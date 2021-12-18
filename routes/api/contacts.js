@@ -1,24 +1,103 @@
-const express = require('express')
-const router = express.Router()
+const express = require('express');
+// const { NotFound, BadRequest } = require('http-errors');
+const Joi = require('joi');
+const {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContact,
+} = require('../../model');
+
+const router = express.Router();
+
+const joiSchema = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string().required(),
+  phone: Joi.string().required(),
+});
 
 router.get('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+  try {
+    const contacts = await listContacts();
+    res.json(contacts);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+  const { contactId } = req.params;
+  try {
+    const contact = await getContactById(contactId);
+    if (!contact) {
+      // throw new NotFound(); - не пойму в чем дело - работает, но возвращает статус 500
+      return res.status(404).json({
+        message: 'Not found',
+      });
+    }
+    res.json(contact);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+  try {
+    const { error } = joiSchema.validate(req.body);
+    if (error) {
+      // throw new BadRequest(error.message); - аналогично возвращает 500
+      return res.status(400).json({
+        message: 'missing required name field',
+      });
+    }
+    const newContact = await addContact(req.body);
+    res.status(201).json(newContact);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.delete('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+  const { contactId } = req.params;
+  try {
+    const deletedContact = await removeContact(contactId);
 
-router.patch('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+    if (!deletedContact) {
+      // throw new NotFound();
+      return res.status(404).json({
+        message: 'Not found',
+      });
+    }
 
-module.exports = router
+    res.json({ message: 'contact deleted' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/:contactId', async (req, res, next) => {
+  const { contactId } = req.params;
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      message: 'missing fields',
+    });
+  }
+
+  try {
+    const updateItem = await updateContact(contactId, req.body);
+
+    if (!updateItem) {
+      // throw new NotFound();
+      return res.status(404).json({
+        message: 'Not found',
+      });
+    }
+
+    res.json(updateItem);
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;
