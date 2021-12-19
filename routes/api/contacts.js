@@ -1,5 +1,4 @@
 const express = require('express');
-// const { NotFound, BadRequest } = require('http-errors');
 const Joi = require('joi');
 const {
   listContacts,
@@ -31,7 +30,6 @@ router.get('/:contactId', async (req, res, next) => {
   try {
     const contact = await getContactById(contactId);
     if (!contact) {
-      // throw new NotFound(); - не пойму в чем дело - работает, но возвращает статус 500
       return res.status(404).json({
         message: 'Not found',
       });
@@ -46,7 +44,6 @@ router.post('/', async (req, res, next) => {
   try {
     const { error } = joiSchema.validate(req.body);
     if (error) {
-      // throw new BadRequest(error.message); - аналогично возвращает 500
       return res.status(400).json({
         message: 'missing required name field',
       });
@@ -64,7 +61,6 @@ router.delete('/:contactId', async (req, res, next) => {
     const deletedContact = await removeContact(contactId);
 
     if (!deletedContact) {
-      // throw new NotFound();
       return res.status(404).json({
         message: 'Not found',
       });
@@ -88,7 +84,6 @@ router.put('/:contactId', async (req, res, next) => {
     const updateItem = await updateContact(contactId, req.body);
 
     if (!updateItem) {
-      // throw new NotFound();
       return res.status(404).json({
         message: 'Not found',
       });
