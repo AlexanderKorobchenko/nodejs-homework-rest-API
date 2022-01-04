@@ -1,8 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const { SECRET_KEY } = process.env;
 
 const { joiRegisterSchema, joiLoginSchema } = require('../../model/user');
 const { User } = require('../../model');
+const { authentication } = require('../../middlewares');
 
 const router = express.Router();
 
@@ -62,9 +66,29 @@ router.post('/login', async (req, res, next) => {
         message: 'Email or password is wrong',
       });
     }
+
+    const payload = { id: user._id };
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1d' });
+    await User.findByIdAndUpdate(user._id, { token });
+    res.json({ token, name: user.name });
   } catch (error) {
     next(error);
   }
+});
+
+router.get('/logout', authentication, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    await User.findByIdAndUpdate(_id, { token: null });
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/current', authentication, async (req, res) => {
+  const { email, subscription } = req.user;
+  res.json({ user: { email, subscription } });
 });
 
 module.exports = router;
