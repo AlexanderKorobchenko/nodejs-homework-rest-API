@@ -1,6 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
+const multer = require('multer');
 
 const { SECRET_KEY } = process.env;
 
@@ -30,11 +32,20 @@ router.post('/register', async (req, res, next) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
-    const newUser = await User.create({ name, email, password: hashPassword });
+
+    const defaultAvatar = gravatar.url(email);
+
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashPassword,
+      avatarURL: defaultAvatar,
+    });
     res.status(201).json({
       user: {
         name: newUser.name,
         email: newUser.email,
+        avatarURL: newUser.avatarURL,
       },
     });
   } catch (error) {
@@ -89,6 +100,14 @@ router.get('/logout', authentication, async (req, res, next) => {
 router.get('/current', authentication, async (req, res) => {
   const { email, subscription } = req.user;
   res.json({ user: { email, subscription } });
+});
+
+router.patch('/avatars', authentication, async (req, res, next) => {
+  try {
+    //
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
