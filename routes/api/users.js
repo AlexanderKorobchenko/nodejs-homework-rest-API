@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 const gravatar = require('gravatar');
 // const path = require('path');
 // const Jimp = require('jimp');
-var cloudinary = require('cloudinary').v2;
+const cloudinary = require('cloudinary').v2;
+const { unlink } = require('fs');
 
 const { SECRET_KEY } = process.env;
 
@@ -85,7 +86,13 @@ router.post('/login', async (req, res, next) => {
     const payload = { id: user._id };
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1d' });
     await User.findByIdAndUpdate(user._id, { token });
-    res.json({ token, name: user.name });
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -138,6 +145,12 @@ router.patch(
           tempAvatarURL = result.url;
         },
       );
+
+      await unlink(tempUpload, error => {
+        if (error) {
+          next(error);
+        }
+      });
 
       await User.findByIdAndUpdate(
         req.user._id,
