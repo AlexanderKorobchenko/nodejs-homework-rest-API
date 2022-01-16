@@ -34,7 +34,8 @@ describe('test users', () => {
     const response = await request(app).post('/api/users/login').send(user);
 
     expect(response.statusCode).toBe(200);
-    expect(response.body.token).toBeTruthy();
+    const isToken = response.body.token.split('.').length;
+    expect(isToken).toBe(3);
     expect(response.body.user.email).toBeTruthy();
     expect(response.body.user.subscription).toBeTruthy();
   });
