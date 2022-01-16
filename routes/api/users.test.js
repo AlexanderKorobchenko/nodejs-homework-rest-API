@@ -36,7 +36,7 @@ describe('test users', () => {
     expect(response.statusCode).toBe(200);
     const isToken = response.body.token.split('.').length;
     expect(isToken).toBe(3);
-    expect(response.body.user.email).toBeTruthy();
-    expect(response.body.user.subscription).toBeTruthy();
+    expect(typeof response.body.user.email).toBe('string');
+    expect(typeof response.body.user.subscription).toBe('string');
   });
 });
