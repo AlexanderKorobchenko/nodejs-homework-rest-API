@@ -16,6 +16,10 @@ const joiLoginSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
 });
 
+const joiEmailSchema = Joi.object({
+  email: Joi.string().pattern(emailRegexp).required(),
+});
+
 const userSchema = Schema(
   {
     name: {
@@ -61,4 +65,4 @@ const userSchema = Schema(
 const User = model('user', userSchema);
 // навание меняем на единственное число
 
-module.exports = { joiRegisterSchema, joiLoginSchema, User };
+module.exports = { joiRegisterSchema, joiLoginSchema, joiEmailSchema, User };
