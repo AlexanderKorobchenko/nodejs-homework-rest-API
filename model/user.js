@@ -16,6 +16,10 @@ const joiLoginSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
 });
 
+const joiEmailSchema = Joi.object({
+  email: Joi.string().pattern(emailRegexp).required(),
+});
+
 const userSchema = Schema(
   {
     name: {
@@ -45,6 +49,15 @@ const userSchema = Schema(
       type: String,
       default: '',
     },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      default: '',
+      // required: [true, 'Verify token is required'],
+    },
   },
   { versionKey: false, timestamps: true },
 );
@@ -52,4 +65,4 @@ const userSchema = Schema(
 const User = model('user', userSchema);
 // навание меняем на единственное число
 
-module.exports = { joiRegisterSchema, joiLoginSchema, User };
+module.exports = { joiRegisterSchema, joiLoginSchema, joiEmailSchema, User };
